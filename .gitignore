@@ -1,0 +1,13 @@
+
+.env.smtp
+
+.env.smtp
+
+.env.smtp
+
+# Local environment files and packet captures
+.env
+.env.*
+*.pcap
+*.pcapng
+.DS_Store

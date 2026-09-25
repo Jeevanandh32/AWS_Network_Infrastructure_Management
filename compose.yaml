@@ -1,0 +1,64 @@
+name: packetlab
+
+services:
+  client:
+    image: alpine:3.22
+    command: ["sleep", "infinity"]
+
+  lab-http:
+    image: nginx:stable-alpine
+
+  diagnostics:
+    build: ./diagnostic
+    image: network-diagnostics:v2
+    network_mode: "service:client"
+    depends_on:
+      - client
+      - lab-http
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    volumes:
+      - ./captures:/captures
+
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:latest
+    network_mode: "service:client"
+    depends_on:
+      - client
+    command:
+      - "--config.file=/config/blackbox.yml"
+    volumes:
+      - ./monitoring/blackbox.yml:/config/blackbox.yml:ro
+    cap_drop:
+      - ALL
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - blackbox
+
+  grafana:
+    image: grafana/grafana:latest
+    env_file:
+      - .env.smtp
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  grafana-data:
