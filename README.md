@@ -7,22 +7,8 @@ A six-service Docker Compose lab for diagnosing container connectivity, monitori
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    subgraph clientnet[Client network namespace]
-        C[Client]
-        D[Diagnostics toolkit]
-        B[Blackbox Exporter]
-    end
-    D -->|Diagnostics and packet capture| H[NGINX test service]
-    B -->|HTTP probe| H
-    P[Prometheus] -->|Scrape every 10 seconds| B
-    G[Grafana] -->|Query metrics| P
-    G -->|Email notifications| O[Operator]
-    O -->|Launch and approve| R[Host recovery script]
-    R -->|Start stopped container| H
-    R -->|Verify HTTP through diagnostics| D
-```
+<img width="1017" height="758" alt="Screenshot 2026-09-27 at 2 33 43 AM" src="https://github.com/user-attachments/assets/08d2c062-7bc1-4c53-a424-3c16778230f0" />
+
 
 | Service | Purpose |
 |---|---|
