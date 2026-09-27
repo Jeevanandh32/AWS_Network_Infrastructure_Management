@@ -1,6 +1,21 @@
 #!/bin/sh
 set -eu
 
+benchmark_event() {
+    if [ -n "${BENCHMARK_LOG:-}" ]; then
+        python3 -c '
+import json, sys, time
+record = {
+    "event": sys.argv[2],
+    "epoch": time.time(),
+    "monotonic": time.monotonic()
+}
+with open(sys.argv[1], "a") as f:
+    f.write(json.dumps(record) + "\n")
+' "$BENCHMARK_LOG" "$1"
+    fi
+}
+
 # Run from the project directory, regardless of where we launch it.
 cd "$(dirname "$0")/.."
 
@@ -29,6 +44,8 @@ if [ "$approval" != "APPROVE" ]; then
     exit 0
 fi
 
+benchmark_event approved
+
 # Check again in case the container changed while awaiting approval.
 current_id=$(docker compose ps -a -q lab-http)
 current_state=$(docker inspect --format '{{.State.Status}}' "$container_id")
@@ -53,6 +70,7 @@ while [ "$attempt" -le 10 ]; do
     ) || status="failed"
 
     if [ "$status" = "200" ]; then
+        benchmark_event http_verified
         echo "Recovery verified: HTTP 200."
         echo "Grafana should resolve the alert after its next evaluations."
         exit 0

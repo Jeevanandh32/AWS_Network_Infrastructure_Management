@@ -1,0 +1,4 @@
+{"event": "stop_issued", "monotonic": 37394.966108208, "utc": "2026-09-27T05:57:42.765608+00:00"}
+{"event": "firing_observed", "monotonic": 37432.909895666}
+{"event": "approved", "epoch": 1790488716.151571, "monotonic": 37448.354327625}
+{"event": "http_verified", "epoch": 1790488716.4877849, "monotonic": 37448.690556666}
